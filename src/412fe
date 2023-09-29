@@ -1,0 +1,70 @@
+#!/usr/bin/python -u
+
+import sys 
+from parserfe import Parser
+import constants
+
+def main(): 
+    try: 
+        filename = None
+
+        # Check the number of command-line arguments
+        if len(sys.argv) > 3: 
+            if '-h' not in sys.argv and '-r' not in sys.argv and '-p' not in sys.argv and '-s' not in sys.argv: 
+                print("ERROR: no valid flags", file=sys.stderr)
+                print("Use -h for information about valid flags")
+            else: 
+                print("Multiple command-line flags have been provided, but only \
+                    given flag with highest priority will be run")
+
+        # Check for the -h flag
+        elif '-h' in sys.argv:
+            print("List of valid command-line arguments and descriptions:")
+            print("-s <name>: Scan and print tokens from <name>")
+            print("-p <name>: Scan, parse, and report errors from <name>")
+            print("-r <name>: Scan, parse, and print intermediate representation from <name>")
+            print("-h: Display this help message")
+            sys.exit(0)
+
+        # Check for the highest priority flag and implement functionality
+        elif '-r' in sys.argv:
+            index = sys.argv.index('-r')
+            if index + 1 < len(sys.argv):
+                filename = sys.argv[index + 1]
+                constants.RFLAG = True
+            else:
+                print("ERROR: Missing filename after -r flag.", file=sys.stderr)
+                sys.exit(1)
+        elif '-p' in sys.argv:
+            index = sys.argv.index('-p')
+            if index + 1 < len(sys.argv):
+                filename = sys.argv[index + 1]
+                constants.PFLAG = True
+            else:
+                print("ERROR: Missing filename after -p flag.", file=sys.stderr)
+                sys.exit(1)
+        elif '-s' in sys.argv:
+            index = sys.argv.index('-s')
+            if index + 1 < len(sys.argv):
+                filename = sys.argv[index + 1]
+                constants.SFLAG = True
+            else:
+                print("ERROR: Missing filename after -s flag.", file=sys.stderr)
+                sys.exit(1)
+        else:
+            filename = sys.argv[-1]
+            constants.PFLAG = True 
+        
+        with open(filename, 'r') as file: 
+            parser = Parser(file)
+            if constants.SFLAG: 
+                parser.print_tokens()
+            else:  
+                parser = Parser(file)
+                print(parser.parse())
+    
+    except FileNotFoundError: 
+        print("ERROR: Filename not found", file=sys.stderr)
+
+if __name__ == "__main__": 
+    main() 

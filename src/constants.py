@@ -1,0 +1,16 @@
+MEMOP = 1
+LOADI = 2
+ARITHOP = 3
+OUTPUT = 4
+NOP = 5
+CONSTANT = 6
+REGISTER = 7
+COMMA = 8
+INTO = 9 
+EOF = 10
+EOL = 11 
+ERROR = 12
+
+PFLAG  = False
+SFLAG = False
+RFLAG = False 
