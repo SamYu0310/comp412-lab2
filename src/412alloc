@@ -1,0 +1,19 @@
+#!/usr/bin/python -u
+
+import sys 
+from parserfe import Parser
+import constants
+from renamer import Renamer
+
+def main(): 
+        
+    with open(sys.argv[2], 'r') as file: 
+        constants.RFLAG = True 
+        parser = Parser(file)
+        ir = parser.parse()
+        renamer = Renamer(ir)
+        renamer.rename()
+        renamer.format()
+
+if __name__ == "__main__": 
+    main() 
