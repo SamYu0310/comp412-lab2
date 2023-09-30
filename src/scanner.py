@@ -58,7 +58,7 @@ class Scanner:
                     c = self.line[self.position]
                     if c == ' ' or c == '\t': 
                         self.position += 1
-                        token = (constants.ARITHOP, self.lexeme)
+                        token = (constants.ARITHOP, self.lexeme, constants.ADD)
                         self.lexeme = ""
                         return token
                     else: 
@@ -110,7 +110,7 @@ class Scanner:
                             c = self.line[self.position]
                             if c == ' ' or c == '\t': 
                                 self.position += 1
-                                token = (constants.LOADI, self.lexeme)
+                                token = (constants.LOADI, self.lexeme, constants.LOADI)
                                 self.lexeme = ""
                                 return token
                             else:
@@ -124,7 +124,7 @@ class Scanner:
                                 return error_token
                         elif c == ' ' or c == '\t': 
                             self.position += 1
-                            token = (constants.MEMOP, self.lexeme)
+                            token = (constants.MEMOP, self.lexeme, constants.LOAD)
                             self.lexeme = ""
                             return token
                         else: 
@@ -176,7 +176,7 @@ class Scanner:
                                 c = self.line[self.position]
                                 if c == ' ' or c == '\t': 
                                     self.position += 1
-                                    token = (constants.ARITHOP, self.lexeme)
+                                    token = (constants.ARITHOP, self.lexeme, constants.LSHIFT)
                                     self.lexeme = ""
                                     return token
                                 else:
@@ -255,7 +255,7 @@ class Scanner:
                             c = self.line[self.position]
                             if c == ' ' or c == '\t': 
                                 self.position += 1
-                                token = (constants.MEMOP, self.lexeme)
+                                token = (constants.MEMOP, self.lexeme, constants.STORE)
                                 self.lexeme = ""
                                 return token 
                             else: 
@@ -304,7 +304,7 @@ class Scanner:
                     c = self.line[self.position]
                     if c == ' ' or c == '\t': 
                         self.position += 1
-                        token = (constants.ARITHOP, self.lexeme)
+                        token = (constants.ARITHOP, self.lexeme, constants.SUB)
                         self.lexeme = ""
                         return token
                     else: 
@@ -360,7 +360,7 @@ class Scanner:
                                 c = self.line[self.position]
                                 if c == ' ' or c == '\t': 
                                     self.position += 1
-                                    token = (constants.ARITHOP, self.lexeme)
+                                    token = (constants.ARITHOP, self.lexeme, constants.RSHIFT)
                                     self.lexeme = ""
                                     return token
                                 else: 
@@ -443,7 +443,7 @@ class Scanner:
                         c = self.line[self.position]
                         if c == ' ' or c == '\t': 
                             self.position += 1
-                            token = (constants.ARITHOP, self.lexeme)
+                            token = (constants.ARITHOP, self.lexeme, constants.MULT)
                             self.lexeme = ""
                             return token
                         else: 
@@ -496,7 +496,7 @@ class Scanner:
                     c = self.line[self.position]
                     if c == ' ' or c == '\t': 
                         self.position += 1
-                        token = (constants.NOP, self.lexeme)
+                        token = (constants.NOP, self.lexeme, constants.NOP)
                         self.lexeme = ""
                         return token
                     else: 
@@ -552,7 +552,7 @@ class Scanner:
                                 c = self.line[self.position]
                                 if c == ' ' or c == '\t': 
                                     self.position += 1
-                                    token = (constants.OUTPUT, self.lexeme)
+                                    token = (constants.OUTPUT, self.lexeme, constants.OUTPUT)
                                     self.lexeme = ""
                                     return token
                                 else: 

@@ -25,6 +25,7 @@ class Parser: #build doubly linked list for IR
 
     def finish_memop(self, scanner): 
         opcode = self.word[0]
+        spec_op = self.word[2]
         sr1 = 0
         sr3 = 0
 
@@ -38,12 +39,12 @@ class Parser: #build doubly linked list for IR
                     sr3 = int(self.word[1][1::])
                     self.word = scanner.get_token()
                     if self.word[0] == 11: 
-                        self.ir.add(self.line_num, opcode, sr1, None, sr3)
+                        self.ir.add(self.line_num, opcode, sr1, None, sr3, spec_op)
                         self.parsed_lines += 1
                         self.line_num = scanner.line_num
                         self.word = scanner.get_token()
                     elif self.word[0] == 10: 
-                        self.ir.add(self.line_num, opcode, sr1, None, sr3)
+                        self.ir.add(self.line_num, opcode, sr1, None, sr3, spec_op)
                         self.parsed_lines += 1
                     else: 
                         if self.word[0] == 12: 
@@ -72,6 +73,7 @@ class Parser: #build doubly linked list for IR
 
     def finish_loadI(self, scanner): 
         opcode = self.word[0]
+        spec_op = self.word[2]
         sr1 = 0
         sr3 = 0
 
@@ -85,12 +87,12 @@ class Parser: #build doubly linked list for IR
                     sr3 = int(self.word[1][1::])
                     self.word = scanner.get_token()
                     if self.word[0] == 11: 
-                        self.ir.add(self.line_num, opcode, sr1, None, sr3)
+                        self.ir.add(self.line_num, opcode, sr1, None, sr3, spec_op)
                         self.parsed_lines += 1
                         self.line_num = scanner.line_num
                         self.word = scanner.get_token()
                     elif self.word[0] == 10: 
-                        self.ir.add(self.line_num, opcode, sr1, None, sr3)
+                        self.ir.add(self.line_num, opcode, sr1, None, sr3, spec_op)
                         self.parsed_lines += 1
                     else: 
                         if self.word[0] == 12: 
@@ -119,6 +121,7 @@ class Parser: #build doubly linked list for IR
 
     def finish_arithop(self, scanner): 
         opcode = self.word[0]
+        spec_op = self.word[2]
         sr1 = 0
         sr2 = 0
         sr3 = 0
@@ -138,12 +141,12 @@ class Parser: #build doubly linked list for IR
                             sr3 = int(self.word[1][1::])
                             self.word = scanner.get_token()
                             if self.word[0] == 11: 
-                                self.ir.add(self.line_num, opcode, sr1, sr2, sr3)
+                                self.ir.add(self.line_num, opcode, sr1, sr2, sr3, spec_op)
                                 self.parsed_lines += 1
                                 self.line_num = scanner.line_num
                                 self.word = scanner.get_token()
                             elif self.word[0] == 10: 
-                                self.ir.add(self.line_num, opcode, sr1, sr2, sr3)
+                                self.ir.add(self.line_num, opcode, sr1, sr2, sr3, spec_op)
                                 self.parsed_lines += 1
                             else:
                                 if self.word[0] == 12: 
@@ -184,6 +187,7 @@ class Parser: #build doubly linked list for IR
     
     def finish_output(self, scanner): 
         opcode = self.word[0]
+        spec_op = self.word[2]
         sr1 = 0
 
         self.word = scanner.get_token()
@@ -191,12 +195,12 @@ class Parser: #build doubly linked list for IR
             sr1 = int(self.word[1])
             self.word = scanner.get_token()
             if self.word[0] == 11: 
-                self.ir.add(self.line_num, opcode, sr1, None, None)
+                self.ir.add(self.line_num, opcode, sr1, None, None, spec_op)
                 self.parsed_lines += 1
                 self.line_num = scanner.line_num
                 self.word = scanner.get_token()
             elif self.word[0] == 10: 
-                self.ir.add(self.line_num, opcode, sr1, None, None)
+                self.ir.add(self.line_num, opcode, sr1, None, None, spec_op)
                 self.parsed_lines += 1
             else:
                 if self.word[0] == 12: 
@@ -213,14 +217,15 @@ class Parser: #build doubly linked list for IR
 
     def finish_nop(self, scanner): 
         opcode = self.word[0]
+        spec_op = self.word[2]
         self.word = scanner.get_token()
         if self.word[0] == 11: 
-            self.ir.add(self.line_num, opcode, None, None, None)
+            self.ir.add(self.line_num, opcode, None, None, None, spec_op)
             self.parsed_lines += 1
             self.line_num = scanner.line_num
             self.word = scanner.get_token()
         elif self.word[0] == 12: 
-            self.ir.add(self.line_num, opcode, None, None, None)
+            self.ir.add(self.line_num, opcode, None, None, None, spec_op)
             self.parsed_lines += 1
         else:
             if self.word[0] == 12: 
