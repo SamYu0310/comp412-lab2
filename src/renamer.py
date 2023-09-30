@@ -1,4 +1,5 @@
 from intermediate_rep import DoublyLinkedList
+import constants
 
 class Renamer: 
 
@@ -13,6 +14,7 @@ class Renamer:
         current = self.ir.tail
         while current: 
             if current.opcode == 4 or current.opcode == 5: 
+                current = current.prev 
                 continue 
             elif current.spec_op == 13: 
                 # For operand that is used 
@@ -91,4 +93,28 @@ class Renamer:
                 lu[op2[0]] = index 
             index -= 1
             current = current.prev
-            
+
+    def format(self): 
+        current = self.ir.head
+        while current: 
+            if current.spec_op == constants.STORE: 
+                print(f"store r{current.operand1[1]} => r{current.operand3[1]}")
+            elif current.spec_op == constants.LOAD: 
+                print(f"load r{current.operand1[1]} => r{current.operand3[1]}")         
+            elif current.opcode == constants.LOADI: 
+                print(f"loadI {current.operand1[0]} => r{current.operand3[1]}")
+            elif current.spec_op == constants.ADD: 
+                print(f"add r{current.operand1[1]}, r{current.operand2[1]} => r{current.operand3[1]}")
+            elif current.spec_op == constants.SUB: 
+                print(f"sub r{current.operand1[1]}, r{current.operand2[1]} => r{current.operand3[1]}")
+            elif current.spec_op == constants.MULT: 
+                print(f"mult r{current.operand1[1]}, r{current.operand2[1]} => r{current.operand3[1]}")
+            elif current.spec_op == constants.LSHIFT: 
+                print(f"lshift r{current.operand1[1]}, r{current.operand2[1]} => r{current.operand3[1]}")
+            elif current.spec_op == constants.RSHIFT: 
+                print(f"rshift r{current.operand1[1]}, r{current.operand2[1]} => r{current.operand3[1]}")
+            elif current.opcode == constants.OUTPUT: 
+                print(f"output {current.operand1[0]}")
+            else: 
+                print(f"nop")
+            current = current.next 
