@@ -17,8 +17,8 @@ class DoublyLinkedList:
         self.num_nodes = 0
         self.max_sr = 0
 
-    def add(self, line_num, opcode, sr1, sr2, sr3): 
-        new_node = Node(line_num, opcode, sr1, sr2, sr3)
+    def add(self, line_num, opcode, sr1, sr2, sr3, spec_op): 
+        new_node = Node(line_num, opcode, sr1, sr2, sr3, spec_op)
         if not self.head: 
             self.head = new_node
             self.tail = new_node
@@ -46,4 +46,3 @@ class DoublyLinkedList:
             result.append(f"[{current.line_num}: {current.opcode}, {current.sr1}, {current.sr2}, {current.sr3}]")
             current = current.next
         return " <-> ".join(result) + " <-> None"
-            
