@@ -14,7 +14,7 @@ class Allocator:
 
         self.reserved_reg = num_regs - 1
         self.registers = list(range(num_regs - 2, -1, -1))
-        self.marked = list[[0] * (num_regs - 2)]
+        self.marked = list([0] * (num_regs - 2))
         if max_live <= num_regs: 
             self.registers.append(self.reserved_reg)
             self.marked.append(0)
@@ -97,7 +97,7 @@ class Allocator:
 
         while current: 
             # Reset marks
-            self.marked = list[[0] * (self.num_regs - 2)]
+            self.marked = list([0] * (self.num_regs - 2))
             if self.max_live <= self.num_regs: 
                 self.marked.append(0)
 
@@ -130,10 +130,10 @@ class Allocator:
                 self.marked[pr3] = 1
                 # Last use 
                 if op3[3] == float('inf') and self.pr_vr[op3[2]] != None: 
-                    self.free(op3[2])
+                    self.free_pr(op3[2])
 
                 # Reset marks
-                self.marked = list[[0] * (self.num_regs - 2)]
+                self.marked = list([0] * (self.num_regs - 2))
                 if self.max_live <= self.num_regs: 
                     self.marked.append(0)
             elif current.spec_op == constants.LOAD: 
@@ -152,7 +152,7 @@ class Allocator:
                     self.free_pr(op1[2])
 
                 # Reset marks
-                self.marked = list[[0] * (self.num_regs - 2)]
+                self.marked = list([0] * (self.num_regs - 2))
                 if self.max_live <= self.num_regs: 
                     self.marked.append(0)
                     
@@ -197,7 +197,7 @@ class Allocator:
                     self.free_pr(op2[2])
 
                 # Reset marks
-                self.marked = list[[0] * (self.num_regs - 2)]
+                self.marked = list([0] * (self.num_regs - 2))
                 if self.max_live <= self.num_regs: 
                     self.marked.append(0)
 
