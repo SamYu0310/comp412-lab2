@@ -4,9 +4,9 @@ class Node:
         self.line_num = line_num
         self.opcode = opcode
         self.spec_op = spec_op
-        self.operand1 = [sr1, 0, 0, 0]
-        self.operand2 = [sr2, 0, 0, 0]
-        self.operand3 = [sr3, 0, 0, 0]
+        self.operand1 = [sr1, None, None, None]  # SR, VR, PR, NU
+        self.operand2 = [sr2, None, None, None]
+        self.operand3 = [sr3, None, None, None]
         self.next = None
         self.prev = None
 
