@@ -4,16 +4,60 @@ import sys
 from parserfe import Parser
 import constants
 from renamer import Renamer
+from allocator import Allocator
 
 def main(): 
-        
-    with open(sys.argv[2], 'r') as file: 
-        constants.RFLAG = True 
-        parser = Parser(file)
-        ir = parser.parse()
-        renamer = Renamer(ir)
-        renamer.rename()
-        renamer.format()
 
+    try: 
+        filename = None
+        num_reg = None 
+
+        # Check the number of command-line arguments
+        if len(sys.argv) != 3: 
+            if '-h' not in sys.argv and '-x' not in sys.argv and 'k' not in sys.argv: 
+                print("ERROR: invalid number of args", file=sys.stderr)
+                print("Use -h for information about valid flags/args")
+            else: 
+                print("Multiple command-line flags have been provided, one \
+                    valid flag must be provided")
+        
+        # Check for the -h flag
+        elif '-h' in sys.argv:
+            print("List of valid command-line arguments and descriptions:")
+            print("-x <name>: Performs renaming on <name>")
+            print("k <name>: Performs allocation on <name> where k is \
+                  number of registers for the allocator")
+            print("-h: Display this help message")
+            sys.exit(0)
+
+        elif 'k' in sys.argv:
+            index = sys.argv.index('k')
+            if index + 1 < len(sys.argv):
+                filename = sys.argv[index + 1]
+                num_reg = sys.argv[index]
+            else:
+                print("ERROR: Missing filename after k.", file=sys.stderr)
+                sys.exit(1)
+
+        elif "-x" in sys.argv:
+            print("implement -x flag")
+
+        else: 
+            print("ERROR: invalid args were given")
+            print("Use -h for information about valid flags/args")
+
+        with open(filename, 'r') as file: 
+            constants.RFLAG = True 
+            parser = Parser(file)
+            ir = parser.parse()
+            renamer = Renamer(ir)
+            renamer.rename()
+            allocator = Allocator(num_reg, renamer.ir, renamer.vr_name, renamer.max_live)
+            allocator.allocate()
+            allocator.format()
+
+    except FileNotFoundError: 
+        print("ERROR: Filename not found", file=sys.stderr)
+        
 if __name__ == "__main__": 
     main() 

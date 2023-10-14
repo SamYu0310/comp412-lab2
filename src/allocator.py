@@ -206,3 +206,29 @@ class Allocator:
                 pr3 = self.get_pr(op3[1], op3[3], current)
                 op3[2] = pr3
                 self.marked[pr3] = 1
+            current = current.next
+
+    def format(self): 
+        current = self.renamed_ir.head
+        while current: 
+            if current.spec_op == constants.STORE: 
+                print(f"store r{current.operand1[2]} => r{current.operand3[2]}")
+            elif current.spec_op == constants.LOAD: 
+                print(f"load r{current.operand1[2]} => r{current.operand3[2]}")         
+            elif current.opcode == constants.LOADI: 
+                print(f"loadI {current.operand1[0]} => r{current.operand3[2]}")
+            elif current.spec_op == constants.ADD: 
+                print(f"add r{current.operand1[2]}, r{current.operand2[2]} => r{current.operand3[2]}")
+            elif current.spec_op == constants.SUB: 
+                print(f"sub r{current.operand1[2]}, r{current.operand2[2]} => r{current.operand3[2]}")
+            elif current.spec_op == constants.MULT: 
+                print(f"mult r{current.operand1[2]}, r{current.operand2[2]} => r{current.operand3[2]}")
+            elif current.spec_op == constants.LSHIFT: 
+                print(f"lshift r{current.operand1[2]}, r{current.operand2[2]} => r{current.operand3[2]}")
+            elif current.spec_op == constants.RSHIFT: 
+                print(f"rshift r{current.operand1[2]}, r{current.operand2[2]} => r{current.operand3[2]}")
+            elif current.opcode == constants.OUTPUT: 
+                print(f"output {current.operand1[0]}")
+            else: 
+                print(f"nop")
+            current = current.next 
