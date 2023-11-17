@@ -25,6 +25,8 @@ class Renamer:
                     sr_vr[op1[0]] = self.vr_name
                     self.vr_name += 1
                     curr_live += 1
+                    if curr_live > self.max_live: 
+                        self.max_live = curr_live 
                 op1[1] = sr_vr[op1[0]]
                 op1[3] = lu[op1[0]]
                 lu[op1[0]] = index 
@@ -34,6 +36,8 @@ class Renamer:
                     sr_vr[op3[0]] = self.vr_name
                     self.vr_name += 1
                     curr_live += 1
+                    if curr_live > self.max_live: 
+                        self.max_live = curr_live 
                 op3[1] = sr_vr[op3[0]]
                 op3[3] = lu[op3[0]]
                 lu[op3[0]] = index 
@@ -45,6 +49,7 @@ class Renamer:
                 if sr_vr[op3[0]] == None: 
                     sr_vr[op3[0]] = self.vr_name
                     self.vr_name += 1
+                else:
                     curr_live -= 1
                 op3[1] = sr_vr[op3[0]]
                 op3[3] = lu[op3[0]]
@@ -57,6 +62,8 @@ class Renamer:
                     sr_vr[op1[0]] = self.vr_name
                     self.vr_name += 1
                     curr_live += 1
+                    if curr_live > self.max_live: 
+                        self.max_live = curr_live 
                 op1[1] = sr_vr[op1[0]]
                 op1[3] = lu[op1[0]]
                 lu[op1[0]] = index 
@@ -66,6 +73,7 @@ class Renamer:
                 if sr_vr[op3[0]] == None: 
                     sr_vr[op3[0]] = self.vr_name
                     self.vr_name += 1
+                else: 
                     curr_live -= 1
                 op3[1] = sr_vr[op3[0]]
                 op3[3] = lu[op3[0]]
@@ -77,6 +85,7 @@ class Renamer:
                 if sr_vr[op3[0]] == None: 
                     sr_vr[op3[0]] = self.vr_name
                     self.vr_name += 1
+                else: 
                     curr_live -= 1 
                 op3[1] = sr_vr[op3[0]]
                 op3[3] = lu[op3[0]]
@@ -89,6 +98,8 @@ class Renamer:
                     sr_vr[op1[0]] = self.vr_name
                     self.vr_name += 1
                     curr_live += 1
+                    if curr_live > self.max_live: 
+                        self.max_live = curr_live 
                 op1[1] = sr_vr[op1[0]]
                 op1[3] = lu[op1[0]]
                 lu[op1[0]] = index 
@@ -98,12 +109,14 @@ class Renamer:
                     sr_vr[op2[0]] = self.vr_name
                     self.vr_name += 1
                     curr_live += 1
+                    if curr_live > self.max_live: 
+                        self.max_live = curr_live 
                 op2[1] = sr_vr[op2[0]]
                 op2[3] = lu[op2[0]]
                 lu[op2[0]] = index 
 
-            if curr_live > self.max_live: 
-                self.max_live = curr_live 
+            # if curr_live > self.max_live: 
+            #     self.max_live = curr_live 
 
             index -= 1
             current = current.prev
