@@ -651,7 +651,4 @@ class Scanner:
             self.line = self.file.readline()
             self.line_num += 1
             return error_token
-                    
-
         
-
