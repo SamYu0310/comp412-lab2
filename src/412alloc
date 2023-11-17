@@ -11,50 +11,69 @@ def main():
     try: 
         filename = None
         num_reg = None 
+        xflag = False 
 
         # Check the number of command-line arguments
-        if len(sys.argv) != 3: 
+        if len(sys.argv) > 3: 
             if '-h' not in sys.argv and '-x' not in sys.argv and 'k' not in sys.argv: 
                 print("ERROR: invalid number of args", file=sys.stderr)
                 print("Use -h for information about valid flags/args")
+                sys.exit(1)
             else: 
-                print("Multiple command-line flags have been provided, one \
-                    valid flag must be provided")
+                print("Too many command-line args have been provided, one valid flag must be provided")
+                sys.exit(1)
         
         # Check for the -h flag
         elif '-h' in sys.argv:
             print("List of valid command-line arguments and descriptions:")
             print("-x <name>: Performs renaming on <name>")
-            print("k <name>: Performs allocation on <name> where k is \
-                  number of registers for the allocator")
+            print("k <name>: Performs allocation on <name> where k is number of registers for the allocator")
             print("-h: Display this help message")
             sys.exit(0)
 
-        elif 'k' in sys.argv:
-            index = sys.argv.index('k')
-            if index + 1 < len(sys.argv):
-                filename = sys.argv[index + 1]
-                num_reg = sys.argv[index]
+        elif "-x" in sys.argv:
+            xflag = True 
+            if 2 < len(sys.argv):
+                filename = sys.argv[2]
             else:
                 print("ERROR: Missing filename after k.", file=sys.stderr)
                 sys.exit(1)
 
-        elif "-x" in sys.argv:
-            print("implement -x flag")
-
         else: 
-            print("ERROR: invalid args were given")
-            print("Use -h for information about valid flags/args")
+            k = None 
+            try: 
+                k = int(sys.argv[1])
+                if k < 3 or k > 64: 
+                    print("ERROR: invalid k value", file = sys.stderr)
+                    sys.exit(1)
+            except: 
+                print("ERROR: invalid number of arguments, use -h flag for help", file = sys.stderr)
+                sys.exit(1)
+            if 2 < len(sys.argv):
+                filename = sys.argv[2]
+                num_reg = k
+            else:
+                print("ERROR: Missing filename after k.", file=sys.stderr)
+                sys.exit(1)
 
-        with open(filename, 'r') as file: 
-            constants.RFLAG = True 
-            parser = Parser(file)
-            ir = parser.parse()
-            renamer = Renamer(ir)
-            renamer.rename()
-            allocator = Allocator(num_reg, renamer.ir, renamer.vr_name, renamer.max_live)
-            allocator.allocate()
-            allocator.format()
+        if xflag: 
+             with open(filename, 'r') as file: 
+                constants.RFLAG = True 
+                parser = Parser(file)
+                ir = parser.parse()
+                renamer = Renamer(ir)
+                renamer.rename()
+                renamer.format()
+        else: 
+            with open(filename, 'r') as file: 
+                constants.RFLAG = True 
+                parser = Parser(file)
+                ir = parser.parse()
+                renamer = Renamer(ir)
+                renamer.rename()
+                allocator = Allocator(num_reg, renamer.ir, renamer.vr_name, renamer.max_live)
+                allocator.allocate()
+                allocator.format()
 
     except FileNotFoundError: 
         print("ERROR: Filename not found", file=sys.stderr)
