@@ -13,22 +13,25 @@ class Allocator:
         self.spill_loc = 32768
 
         self.reserved_reg = num_regs - 1
-        self.registers = list(range(num_regs - 2, -1, -1))
-        self.marked = list([0] * (num_regs - 2))
+        self.registers= []
+        self.marked = None 
         if max_live <= num_regs: 
             self.registers.append(self.reserved_reg)
-            self.marked.append(0)
+        for reg in range(num_regs - 2, -1, -1): 
+            self.registers.append(reg)
 
         self.vr_pr = [None] * vr_name
         self.pr_vr = [None] * num_regs
         self.vr_spill = [None] * vr_name
+        self.vr_constant = [None] * vr_name
         self.pr_nu = [float('inf')] * num_regs 
 
     def get_pr(self, vr, nu, current): 
+        pr = None 
         if len(self.registers) != 0: 
             pr = self.registers.pop()
         else: 
-            pr = self.spill(current) 
+            pr = self.spill(current)
         
         self.vr_pr[vr] = pr 
         self.pr_vr[pr] = vr 
@@ -41,13 +44,13 @@ class Allocator:
         spill_reg = 0
         spill_vr = 0 
         highest_nu = 0
-        for idx in range(self.marked): 
-            if self.marked[idx] == 1: 
+        for idx in range(self.num_regs - 1): 
+            if self.marked == idx: 
                 continue 
             if self.pr_nu[idx] > highest_nu: 
                 spill_reg = idx 
                 highest_nu = self.pr_nu[idx]
-                spill_vr = self.pr_nu[idx]
+                spill_vr = self.pr_vr[idx]
         
         if self.vr_spill[spill_vr] == None: 
             curr_spill = self.spill_loc
@@ -58,154 +61,167 @@ class Allocator:
 
         self.vr_pr[spill_vr] = None
 
-        new_node = Node(sys.maxint, constants.LOADI, curr_spill, None, None, constants.LOADI)
+        new_node = Node(sys.maxsize, constants.LOADI, curr_spill, None, None, constants.LOADI)
         new_node.operand3[2] = self.reserved_reg 
         self.insert_left(current, new_node)
 
-        new_node2 = Node(sys.maxint, constants.MEMOP, None, None, None, constants.STORE)
+        new_node2 = Node(sys.maxsize, constants.MEMOP, None, None, None, constants.STORE)
         new_node2.operand1[2] = spill_reg
         new_node2.operand3[2] = self.reserved_reg
         self.insert_left(current, new_node2)
 
         return spill_reg  
-    
+
     def free_pr(self, pr): 
         self.vr_pr[self.pr_vr[pr]] = None
         self.pr_vr[pr] = None
-        self.pr_nu = float('inf')
+        self.pr_nu[pr] = float('inf')
 
         self.registers.append(pr)
 
     def restore(self, vr, pr, current): 
-        new_node = Node(sys.maxint, constants.LOADI, self.vr_spill[vr], None, None, constants.LOADI)
-        new_node.operand3[2] = self.reserved_reg
-        self.insert_left(current, new_node)
+        if self.vr_constant[vr] != None: 
+            new_node = Node(sys.maxsize, constants.LOADI, self.vr_constant[vr], None, None, constants.LOADI)
+            new_node.operand3[2] = pr
+            self.insert_left(current, new_node)
+        
+        else: 
+            new_node = Node(sys.maxsize, constants.LOADI, self.vr_spill[vr], None, None, constants.LOADI)
+            new_node.operand3[2] = self.reserved_reg
+            self.insert_left(current, new_node)
 
-        new_node2 = Node(sys.maxint, constants.MEMOP, None, None, None, constants.LOAD)
-        new_node2.operand1 = self.reserved_reg
-        new_node2.operand3 = pr 
-        self.insert_left(current, new_node2)
+            new_node2 = Node(sys.maxsize, constants.MEMOP, None, None, None, constants.LOAD)
+            new_node2.operand1[2] = self.reserved_reg
+            new_node2.operand3[2] = pr 
+            self.insert_left(current, new_node2)
+
     
-    def insert_left(current: Node, new_node: Node): 
-        new_node.next = current 
-        new_node.prev = current.prev 
-        current.prev.next = new_node 
-        current.prev = new_node 
+    def insert_left(self, current: Node, new_node: Node): 
+        if current == self.renamed_ir.head: 
+            new_node.next = current 
+            new_node.prev = None 
+            current.prev = new_node 
+            self.renamed_ir.head = new_node 
+        else: 
+            new_node.next = current 
+            new_node.prev = current.prev 
+            current.prev.next = new_node 
+            current.prev = new_node
+
+    def remove(self, current: Node): 
+        if current == self.renamed_ir.head: 
+            self.renamed_ir.head = current.next 
+            current.next.prev = None 
+        elif current == self.renamed_ir.tail: 
+            self.renamed_ir.tail = current.prev 
+            current.prev.next = None 
+        else: 
+            current.prev.next = current.next 
+            current.next.prev = current.prev 
 
     def allocate(self): 
         current = self.renamed_ir.head 
 
         while current: 
-            # Reset marks
-            self.marked = list([0] * (self.num_regs - 2))
-            if self.max_live <= self.num_regs: 
-                self.marked.append(0)
+            self.marked = None 
 
             if current.opcode == constants.OUTPUT or current.opcode == constants.NOP: 
                 current = current.next 
                 continue 
+            elif current.opcode == constants.LOADI: 
+                self.vr_constant[current.operand3[1]] = current.operand1[0]
+                self.remove(current) 
+
             elif current.spec_op == constants.STORE: 
                 # For use 
                 op1 = current.operand1  # OP 1 
                 # Allocates use 
                 pr1 = self.vr_pr[op1[1]] # Allocates use 
                 if pr1 == None:
-                    op1[2] = self.get_pr(op1[1], op1[3], current)
+                    pr1 = self.get_pr(op1[1], op1[3], current)
+                    op1[2] = pr1
                     self.restore(op1[1], op1[2], current)
                 else: 
                     op1[2] = pr1 
-                self.marked[pr1] = 1
-                # Last use 
-                if op1[3] == float('inf') and self.pr_vr[op1[2]] != None: 
-                    self.free_pr(op1[2])
+                self.marked = pr1
+
 
                 op3 = current.operand3  # OP 3 
                 # Allocates use 
                 pr3 = self.vr_pr[op3[1]] 
                 if pr3 == None: 
-                    op3[2] = self.get_pr(op3[1], op3[3], current)
+                    pr3 = self.get_pr(op3[1], op3[3], current)
+                    op3[2] = pr3
                     self.restore(op3[1], op3[2], current)
                 else: 
                     op3[2] = pr3 
-                self.marked[pr3] = 1
+                self.marked = pr3
                 # Last use 
-                if op3[3] == float('inf') and self.pr_vr[op3[2]] != None: 
+                if op1[3] == float('inf') and op1[2] != None and self.pr_vr[op1[2]] != None: 
+                    self.free_pr(op1[2])
+                if op3[3] == float('inf') and op3[2] != None and self.pr_vr[op3[2]] != None: 
                     self.free_pr(op3[2])
 
-                # Reset marks
-                self.marked = list([0] * (self.num_regs - 2))
-                if self.max_live <= self.num_regs: 
-                    self.marked.append(0)
+                self.marked = None 
             elif current.spec_op == constants.LOAD: 
                 # For use 
                 op1 = current.operand1  # OP 1 
                 # Allocates use 
                 pr1 = self.vr_pr[op1[1]]
                 if pr1 == None: 
-                    op1 = self.get_pr(op1[1], op1[3], current)
+                    pr1 = self.get_pr(op1[1], op1[3], current)
+                    op1[2] = pr1
                     self.restore(op1[1], op1[2], current)
                 else: 
                     op1[2] = pr1 
-                self.marked[pr1] = 1
+                self.marked = pr1
                 # Last use 
-                if op1[3] == float('inf') and self.pr_vr[op1[2]] != None: 
+                if op1[3] == float('inf') and op1[2] != None and self.pr_vr[op1[2]] != None: 
                     self.free_pr(op1[2])
 
-                # Reset marks
-                self.marked = list([0] * (self.num_regs - 2))
-                if self.max_live <= self.num_regs: 
-                    self.marked.append(0)
-                    
+                self.marked = None 
                 # For definition
                 op3 = current.operand3  # OP 3
                 pr3 = self.get_pr(op3[1], op3[3], current)
                 op3[2] = pr3
-                self.marked[pr3] = 1
-            elif current.opcode == constants.LOADI: 
-                # For definition
-                op3 = current.operand3  # OP 3
-                pr3 = self.get_pr(op3[1], op3[3], current)
-                op3[2] = pr3
-                self.marked[pr3] = 1
+                self.marked = pr3
             else: 
                 # For use 
                 op1 = current.operand1  # OP 1
                 # Allocates use  
                 pr1 = self.vr_pr[op1[1]]
                 if pr1 == None: 
-                    op1 = self.get_pr(op1[1], op1[3], current)
+                    pr1 = self.get_pr(op1[1], op1[3], current)
+                    op1[2] = pr1
                     self.restore(op1[1], op1[2], current)
                 else: 
                     op1[2] = pr1 
-                self.marked[pr1] = 1
-                # Last use 
-                if op1[3] == float('inf') and self.pr_vr[op1[2]] != None: 
-                    self.free_pr(op1[2])
+                self.marked = pr1
 
                 # For use 
                 op2 = current.operand2  # OP 2 
                 # Allocates use 
                 pr2 = self.vr_pr[op2[1]]
                 if pr2 == None: 
-                    op2 = self.get_pr(op2[1], op2[3], current)
+                    pr2 = self.get_pr(op2[1], op2[3], current)
+                    op2[2] = pr2
                     self.restore(op2[1], op2[2], current)
                 else: 
-                    op1[2] = pr2
-                self.marked[pr2] = 1 
+                    op2[2] = pr2
+                self.marked = pr2
                 # Last use 
-                if op2[3] == float('inf') and self.pr_vr[op2[2]] != None: 
+                if op1[3] == float('inf') and op1[2] != None and self.pr_vr[op1[2]] != None: 
+                    self.free_pr(op1[2])
+                if op2[3] == float('inf') and op2[2] != None and self.pr_vr[op2[2]] != None: 
                     self.free_pr(op2[2])
 
-                # Reset marks
-                self.marked = list([0] * (self.num_regs - 2))
-                if self.max_live <= self.num_regs: 
-                    self.marked.append(0)
+                self.marked = None 
 
                 # For definition
                 op3 = current.operand3  # OP 3
                 pr3 = self.get_pr(op3[1], op3[3], current)
                 op3[2] = pr3
-                self.marked[pr3] = 1
+                self.marked = pr3
             current = current.next
 
     def format(self): 
